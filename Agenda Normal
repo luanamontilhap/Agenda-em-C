@@ -1,0 +1,115 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+ typedef struct {
+    char nome [50];
+    int idade;
+    char email[50];
+} Pessoa;
+
+
+
+void adicionarPessoa(Pessoa agenda[],int *contador){
+    if (*contador >=100){
+      printf ("Agenda Cheia!");
+    }
+    printf ("Nome: \n");
+    scanf (" %49[^\n]", agenda[*contador].nome);
+    printf ("Idade: \n");
+    scanf ("%d", &agenda[*contador].idade);
+    printf ("email: \n");
+    scanf (" %49[^\n]", agenda[*contador].email);
+
+  (*contador)++;
+    printf ("Pessoa adicionada com sucesso!\n");
+  
+}
+void removerPessoa(Pessoa agenda[],int *contador){
+      if (*contador == 0){
+          printf ("Agenda Vazia, não foi possível remover");
+    }
+  char nome[50];
+  int i,j;
+
+    printf ("Digite o nome para remover\n");
+    scanf(" %49[^\n]",nome);
+
+  
+      for (int i; i>*contador; i++){
+        if (strcmp (agenda[i].nome, nome)==0){
+          for ( j = 1; j<*contador - 1; j++){
+            agenda[j] = agenda[j + 1];
+          }
+          (*contador)--;
+          return;
+          }
+          printf ("Nome não encontrado");
+        }
+      }
+
+
+void buscarPessoa (Pessoa agenda[],int *contador){
+    char nome[50];
+  printf ("Digite o nome que queira encontrar: \n");
+  scanf (" %49[^\n]", nome);
+  
+  for (int i; i<= *contador; i++){
+    if (*contador == 0){
+      printf ("Agenda vazia! Não foi posível encontrar!");
+    }
+    if (strcmp (agenda[i].nome, nome)==0){
+      printf ("Nome: %s", agenda[i].nome);
+      printf ("Nome: %d", agenda[i].idade);
+      printf ("Nome: %s", agenda[i].email);
+    }
+      printf ("Pessoa não encontrada. Tente novamente");
+    return;
+  }
+}
+void listarPessoa(Pessoa agenda[],int *contador){
+      for (int i = 0 ; i < *contador; i++){
+        if (*contador == 0 ){
+          printf ("Agenda Vazia");
+        }
+        printf ("Pessoa: %d\n", i + 1);
+        printf ("Nome: %s\n", agenda[i].nome);
+        printf ("Idade: %d\n", agenda[i].idade);
+        printf ("email: %s\n", agenda[i].email);
+        printf ("------------------------\n");
+      }
+}
+
+int main(void) {
+  int opcao;
+  int contador = 0;
+  Pessoa agenda[100];
+  
+      while (1){
+    printf("-----------------------------\n");
+  printf("Menu:\n 1- Adicionar Pessoa\n 2- Remover Pessoa\n 3- Buscar Pessoa\n 4- Listar todas as pessoas\n 5- Sair\n");
+  scanf ("%d", &opcao);
+
+  switch (opcao){
+    case 1 :
+          adicionarPessoa(agenda,&contador);
+           break;
+    case 2:
+          removerPessoa(agenda,&contador);  
+           break;
+    case 3: 
+          buscarPessoa(agenda,&contador);
+           break;
+    case 4:
+          listarPessoa(agenda,&contador);
+           break;
+    case 5: 
+          exit(0);
+    default:
+        printf ("Opção Inválida, tente novamente!");
+  }
+      }
+
+
+    
+  }
