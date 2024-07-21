@@ -1,0 +1,243 @@
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+
+//  Tamanhos usados 
+#define TOTAL_PESSOA_SIZE sizeof(char) * 10 + sizeof(int) * 2 + sizeof(void *) * 2
+#define PREV sizeof(char) * 10 + sizeof(int) * 2 
+#define PROX sizeof(char) * 10 + sizeof(int) * 2 + sizeof(void *)
+#define NOME_SIZE 0
+#define IDADE_SIZE sizeof(char) * 10 
+#define EMAIL_SIZE sizeof(char) * 10 + sizeof(int) 
+
+
+// Função para adicionar uma pessoa
+void *AdicionarPessoa() {
+    void *pessoa = malloc(TOTAL_PESSOA_SIZE);
+    if (pessoa == NULL) {
+        printf("ERRO na alocação de memória.\n");
+        exit(1);
+    }
+
+    printf("\tDigite o nome: ");
+    scanf("%s", (char *)pessoa);
+
+    printf("\tDigite a idade: ");
+    scanf("%d", (int *)((char *)pessoa + IDADE_SIZE));
+
+    while (*(int *)((char *)pessoa + IDADE_SIZE) < 0 || *(int *)((char *)pessoa + IDADE_SIZE) > 99) {
+        printf("\n\tERRO. Idade inválida. Tente novamente!\n");
+        printf("\tDigite a idade: ");
+        scanf("%d", (int *)((char *)pessoa + IDADE_SIZE));
+    }
+
+    printf("\tDigite o email: ");
+    scanf("%s", (char *)((char *)pessoa + EMAIL_SIZE));
+
+    printf("\nPessoa adicionada com sucesso!\n");
+    return pessoa;
+}
+
+// Função para incluir uma pessoa na lista em ordem alfabética
+void *IncluirPessoa(void *pont, void *dadosPessoa) {
+    //Insere no início da lista
+    if (pont == NULL) {
+        pont = dadosPessoa;
+        *(void **)(pont + PREV) = NULL;
+        *(void **)(pont + PROX) = NULL;
+        return pont;
+    }
+
+    //Inserir no início se o primeiro valor for "maior" que dadosPessoa
+    if (strcmp((char *)pont , (char *)dadosPessoa) > 0) {
+        void *novoPont = dadosPessoa;
+        *(void **)(novoPont + PREV) = NULL;
+        *(void **)(novoPont + PROX) = pont;
+        *(void **)(pont + PREV) = novoPont;
+        return novoPont;
+    } else {
+        void *novoPont = pont;
+        while (*(void **)(novoPont + PROX) != NULL) {
+            if (novoPont != NULL) {
+                novoPont = *(void **)(novoPont + PROX);
+                if (strcmp((char *)novoPont, (char *)dadosPessoa) > 0) {
+                    void *tempPREV = *(void **)(novoPont + PREV);
+                    void *tempPROX = novoPont;
+                    *(void **)(dadosPessoa + PREV) = tempPREV;
+                    *(void **)(dadosPessoa + PROX) = novoPont;
+                    *(void **)(tempPROX + PREV) = dadosPessoa;
+                    *(void **)(tempPREV + PROX) = dadosPessoa;
+                    return pont;
+                }
+            }
+        }
+        *(void **)(dadosPessoa + PREV) = novoPont;
+        *(void **)(novoPont + PROX) = dadosPessoa;
+        *(void **)(dadosPessoa + PROX) = NULL;
+        return pont;
+    }
+}
+
+// Função para listar todas as pessoas na lista
+void ListarPessoas(void *pont) {
+    if (pont == NULL) {
+        printf("\n\tAgenda vazia\n");
+        return;
+    }
+
+    void *dados = pont;
+    printf("\n\tLISTA DE DADOS NA AGENDA\n");
+    while (dados != NULL) { 
+        printf("\tNome: %s\n", (char *)dados);
+        printf("\tIdade: %d\n", *(int *)((char *)dados + IDADE_SIZE));
+        printf("\tEmail: %s\n", (char *)((char *)dados + EMAIL_SIZE));
+        dados = *(void **)(dados + PROX);
+    }
+}
+
+// Função para buscar uma pessoa na lista
+void BuscarPessoa(void *pont) {
+    void *pBusca = pont;
+    void *pPessoa = malloc(NOME_SIZE);
+
+    if (pPessoa == NULL) {
+        printf("ERRO na alocação de memória.\n");
+        exit(1);
+    }
+
+    printf("\tDigite o nome: ");
+    scanf("%s", (char *)pPessoa);
+
+    if (pont == NULL) {
+        printf("\n\tAgenda vazia\n");
+        return;
+    }
+
+    while (*(void **)pBusca != NULL) {
+        if (pBusca != NULL) {
+            if (strcmp((char *)pBusca, (char *)pPessoa) == 0) {
+                printf("\n\t'%s' está na agenda! Idade: %d Email: %s\n", (char *)pBusca, *(int *)((char *)pBusca + IDADE_SIZE), (char *)pBusca + EMAIL_SIZE);
+                
+            } 
+          printf ("Pessoa não encontrada");
+            pBusca = *(void **)(pBusca + PROX);
+          
+        }
+    }
+    free(pPessoa); // Libera a memória alocada para pPessoa
+}
+
+// Função para capturar o nome da pessoa a ser removida
+char *PegarNomeParaRemover() {
+    char *nome = malloc(sizeof(char) * 10); // Supondo um tamanho máximo para o nome
+    if (nome == NULL) {
+        printf("Erro na alocação de memória.\n");
+        exit(1);
+    }
+    printf("\tDigite o nome da pessoa a ser removida: ");
+    scanf("%s", nome);
+    return nome;
+}
+
+// Função para remover uma pessoa da lista
+void *RemoverPessoa(void *pont, void *nomePessoa) {
+    void *pessoaAtual = pont;
+
+    if (pont == NULL) {
+        printf("\n\tAgenda vazia\n");
+        return NULL;
+    }
+
+    // Caso especial: remover o primeiro elemento
+    if (strcmp((char *)pessoaAtual, (char *)nomePessoa) == 0) {
+        pont = *(void **)(pessoaAtual + PROX);
+        if (pont != NULL) {
+            *(void **)(pont + PREV) = NULL;
+        }
+        free(pessoaAtual);
+        printf("\n\tDados removidos!\n");
+        return pont;
+    }
+
+    // Percorre a lista para encontrar a pessoa a ser removida
+    while (pessoaAtual != NULL) {
+        if (strcmp((char *)pessoaAtual, (char *)nomePessoa) == 0) {
+            void *prevPessoa = *(void **)(pessoaAtual + PREV);
+            void *nextPessoa = *(void **)(pessoaAtual + PROX);
+
+            // Atualiza o ponteiro next do elemento anterior
+            if (prevPessoa != NULL) {
+                *(void **)(prevPessoa + PROX) = nextPessoa;
+            }
+
+            // Atualiza o ponteiro prev do elemento seguinte
+            if (nextPessoa != NULL) {
+                *(void **)(nextPessoa + PREV) = prevPessoa;
+            }
+
+            // Libera a memória do elemento atual
+            free(pessoaAtual);
+            printf("\n\tDados removidos!\n");
+            return pont; // Retorna a lista atualizada
+        }
+        pessoaAtual = *(void **)(pessoaAtual + PROX);
+    }
+
+    // Se não encontrou a pessoa
+    printf("\n\tPessoa não encontrada na agenda\n");
+    return pont; // Retorna a lista original
+}
+// Função do menu
+void Menu(void *pont) {
+    for (;;) {
+        printf("\n\t\tMENU\n");
+        printf("\t1) Adicionar pessoa\n");
+        printf("\t2) Listar pessoas\n");
+        printf("\t3) Buscar pessoa\n");
+        printf("\t4) Remover pessoa\n");
+        printf("\t5) Sair\n");
+        printf("\tDigite sua escolha: ");
+
+        switch (getchar()) {
+            case '1':
+                pont = IncluirPessoa(pont, AdicionarPessoa());
+                getchar(); // Limpa o buffer de entrada
+                break;
+            case '2':
+                ListarPessoas(pont);
+                getchar(); // Limpa o buffer de entrada
+                break;
+            case '3':
+                BuscarPessoa(pont);
+                getchar(); // Limpa o buffer de entrada
+                break;
+            case '4': {
+                char *nomeParaRemover = PegarNomeParaRemover();
+                pont = RemoverPessoa(pont, nomeParaRemover);
+
+                free(nomeParaRemover); // Libera a memória alocada para o nome
+                getchar(); // Limpa o buffer de entrada
+                break;
+            }
+            case '5':
+                exit(0);
+                getchar(); // Limpa o buffer de entrada
+                break;
+            default:
+
+                printf("\n\n\tERRO. Tente novamente!\n");
+                break;
+        }
+    }
+}
+
+// Função principal
+int main() {
+    void *pont = NULL; // Inicializa o ponteiro para lista vazia
+    Menu(pont);
+    return 0;
+}
+
+
+
+
